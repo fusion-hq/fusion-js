@@ -1,0 +1,16 @@
+{
+  "name": "fusion-analytics",
+  "version": "1.0.0",
+  "description": "Send analytics data from JS/TS based products. (React, Angular, Vue, Node)",
+  "main": "fusion.js",
+  "scripts": {
+    "serve": "parcel serve ./demo_app/index.html",
+    "dev": "parcel ./demo_app/index.html",
+    "build": "parcel build ./src/fusion.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "parcel-bundler": "^1.12.5"
+  }
+}
