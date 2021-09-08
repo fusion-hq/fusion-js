@@ -8,15 +8,8 @@
  *
  */
 
-//TODO: Add autocaputre using vanilla js DOM events(scrap jquery)
+//TODO: Add autocaputre using vanilla js DOM events(or using jquery)
 //TODO: Pageleave support
-
-//Load the jquery script
-var script = document.createElement("SCRIPT");
-script.src = "https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js";
-script.type = "text/javascript";
-document.getElementsByTagName("HEAD")[0].appendChild(script);
-var autocaptureEnabled;
 
 import {
   readCookie,
@@ -29,7 +22,7 @@ import {
   referringDomain,
 } from "./utils";
 
-export class Fusion {
+class Fusion {
   setup() {
     const Http = new XMLHttpRequest();
     const libraryType = "web",
@@ -244,6 +237,60 @@ export class Fusion {
   }
 
   /**
+   ** Function Definition : Identify user by attcking a user defined uuid
+   *  Can be callded from script tag or from html button/links/form
+   * @param  {} event -> event name
+   * @param  {} properties -> key-value pair json of properties
+   */
+
+  indentify(uuid, properties) {
+    uuid == undefined ? this.uuid == "" : (this.uuid = uuid);
+    properties == undefined
+      ? this.userDefinedProperties == ""
+      : (this.userDefinedProperties = properties);
+
+    //read data saved in cookie and parse it
+    this.eventPropertyPayload = JSON.parse(
+      decodeURIComponent(readCookie(`fusion_${this.apiKey}`))
+    );
+
+    // add property passed by user into propery above parsed - eventPropertyPayload
+    for (const property in this.userDefinedProperties) {
+      //console.log(`${property}: ${this.propertiesToRegister[property]}`);
+      this.eventPropertyPayload[
+        property
+      ] = `${this.userDefinedProperties[property]}`;
+    }
+
+    //default super properties assigned by fusion.js
+    this.eventPropertyPayload.website = this.host;
+    this.eventPropertyPayload.page = this.path;
+    this.eventPropertyPayload.browser = this.browser;
+    this.eventPropertyPayload.browser_version = this.browserVersion;
+    this.eventPropertyPayload.os = this.os;
+    this.eventPropertyPayload.device_type = this.deviceType;
+    this.eventPropertyPayload.screen_height = this.screenHeight;
+    this.eventPropertyPayload.screen_width = this.screenWidth;
+    this.eventPropertyPayload.ip = this.userIP;
+    this.eventPropertyPayload.library_type = this.libraryType;
+    this.eventPropertyPayload.library_version = this.libraryVersion;
+    this.eventPropertyPayload.referrer = this.referrer || "direct";
+    this.eventPropertyPayload.referring_website =
+      this.referrerDomain || "direct";
+
+    //console.log(this.eventPropertyPayload);
+    this.propertiesToSend = JSON.stringify(this.eventPropertyPayload);
+    const Http = new XMLHttpRequest();
+    this.time = new Date().getTime();
+
+    Http.open(
+      "GET",
+      `${this.apiHost}/user?uuid=${this.uuid}&properties=${this.propertiesToSend}&apiKey=${this.apiKey}`
+    );
+    Http.send();
+  }
+
+  /**
    ** Main entry point of the tracking library
    * That sets api_key, api_host and autocapture_enabled setting
    * & calls setup() thus sends pageview event also
@@ -254,7 +301,14 @@ export class Fusion {
   init(api_key, api_host, autocapture_enabled) {
     this.apiHost = api_host;
     this.apiKey = api_key;
-    autocaptureEnabled = autocapture_enabled;
     this.setup();
   }
+}
+
+//module.exports = Fusion;
+
+//below function create an instance of above Fusion class
+export function init_fusion_as_module() {
+  var fusion_lib_instance = new Fusion();
+  return fusion_lib_instance;
 }

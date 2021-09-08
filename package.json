@@ -6,7 +6,7 @@
   "scripts": {
     "serve": "parcel serve ./demo_app/index.html",
     "dev": "parcel ./demo_app/index.html",
-    "build": "parcel build ./src/fusion.js"
+    "build": "parcel build ./src/module-loader.js"
   },
   "author": "",
   "license": "ISC",
