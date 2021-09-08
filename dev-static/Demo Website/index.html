@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#000000" />
+    <meta name="description" content="Fusion Analytics Test Website" />
+    <title>Fusion Analytics Test Website</title>
+
+    <!-- 
+      Dummy website that uses fusion tracking library
+      Author: Vikas Singh 
+      Date: 4/3/21 
+     -->
+    <!-- Fusion page tracker script-->
+  </head>
+
+  <body>
+    <!--
+    <script src="./fusion-tracking-library.js"></script>
+   <script src="https://cdn.jsdelivr.net/gh/fusion-hq/fusion-tracking-suit-v3/fusion-tracking-library.js"></script>
+    <script>
+      fusion.init("123", "http://localhost:3000", false);
+    </script>
+  -->
+
+    <!-- Fusion Analytics Tracking Script-->
+    <script>
+      (function () {
+        var fusionScript = document.createElement("SCRIPT");
+        fusionScript.src = "../fusion.js";
+        fusionScript.type = "text/javascript";
+        document.getElementsByTagName("HEAD")[0].appendChild(fusionScript);
+        document.onreadystatechange = function () {
+          if (document.readyState === "complete") {
+            fusion.init(
+              "608813b5254914007109279a",
+              "http://localhost:3000",
+              true
+            );
+          }
+        };
+      })();
+    </script>
+
+    <div id="root">
+      <h1>This is the root page</h1>
+      <button
+        onclick="fusion.track('Played song', {songName: 'thriller by MJ'})"
+      >
+        Play a song
+      </button>
+      <button
+        onclick="fusion.track('Stoped song', {songName: 'thriller by MJ'})"
+      >
+        Stop</button
+      ><button
+        onclick="fusion.track('Next song', {songName: 'RapGod by Eminem'})"
+      >
+        Next
+      </button>
+
+      <!-- Button for autocapturing -->
+      <button
+        class="test-button"
+        id="1"
+        onclick="fusion.register({plan: 'free'})"
+      >
+        Button1
+      </button>
+      <button id="2" onclick="fusion.unregister(plan)">Button2</button>
+      <button id="3">Button3</button>
+
+      <a href="" id="test-link" class="TestLink">Test Link</a>
+
+      <form name="TEST-FORM " type="submit">
+        <input id="name" class="some-classname-name-input" />
+        <input id="email" class="some-classname-email-input" />
+        <button onclick="submit">Submit</button>
+      </form>
+
+      <form>
+        <input type="radio" id="html" name="fav_language" value="HTML" />
+        <label for="html">HTML</label><br />
+        <input type="radio" id="css" name="fav_language" value="CSS" />
+        <label for="css">CSS</label><br />
+        <input
+          type="radio"
+          id="javascript"
+          name="fav_language"
+          value="JavaScript"
+        />
+        <label for="javascript">JavaScript</label><br /><br />
+        <input type="submit" value="Submit" />
+      </form>
+
+      <form>
+        <input type="checkbox" id="vehicle1" name="vehicle1" value="Bike" />
+        <label for="vehicle1"> I have a bike</label><br />
+        <input type="checkbox" id="vehicle2" name="vehicle2" value="Car" />
+        <label for="vehicle2"> I have a car</label><br />
+        <input type="checkbox" id="vehicle3" name="vehicle3" value="Boat" />
+        <label for="vehicle3"> I have a boat</label>
+      </form>
+
+      <label for="myfile">Select a file:</label>
+      <input type="file" id="myfile" name="myfile" /><br /><br />
+      <input type="submit" value="Submit" />
+
+      <form action="/action_page.php">
+        <label for="cars">Choose a car:</label>
+        <select name="cars" id="cars">
+          <option value="volvo">Volvo</option>
+          <option value="saab">Saab</option>
+          <option value="opel">Opel</option>
+          <option value="audi">Audi</option>
+        </select>
+        <br /><br />
+        <input type="submit" value="Submit" />
+      </form>
+    </div>
+  </body>
+</html>

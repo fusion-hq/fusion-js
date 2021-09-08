@@ -1,0 +1,24 @@
+{
+  "name": "fusion-analytics-js",
+  "version": "1.0.2",
+  "description": "Send analytics data from JS/TS based products. (React, Angular, Vue)",
+  "main": "fusion.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Vikas Singh",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fusion-hq/fusion-js.git"
+  },
+  "keywords": [
+    "Fusion",
+    "analytics"
+  ],
+  "bugs": {
+    "url": "https://github.com/fusion-hq/fusion-js/issues"
+  },
+  "homepage": "https://github.com/fusion-hq/fusion-js#readme"
+}
