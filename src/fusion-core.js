@@ -302,10 +302,9 @@ class Fusion {
     this.apiHost = api_host;
     this.apiKey = api_key;
     this.setup();
+    console.log("ends");
   }
 }
-
-//module.exports = Fusion;
 
 //below function create an instance of above Fusion class
 export function init_fusion_as_module() {
