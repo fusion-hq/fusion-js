@@ -1,9 +1,14 @@
 /**
  *
- * * Fusion Analytics Javascript Library
+ * * Fusion Analytcs Javascript Library
  *   Author: Vikas Singh
  *   Date: 21/5/21
- *   Version : Alpha-V3
+ *   Version : Alpha-V4
+ *
+ *
+ * * Change Log :
+ *  Auto-capture is completely based on vanilla JS insated of Jquery - Vikas Singh -29/09/21
+ *  Although detecting dom ready uses jquery as vanilla is not compatible some IE versions
  *
  */
 
@@ -358,7 +363,7 @@ class Fusion {
         keyword = "";
       campaignKeywords.forEach((keywordKey) => {
         keyword = getQueryParam(document.URL, keywordKey);
-        console.log(keyword);
+        //console.log(keyword);
         if (keyword.length) {
           params[keywordKey] = `${keyword}`;
         }
@@ -487,6 +492,7 @@ class Fusion {
     this.eventPropertyPayload.website = this.host;
     this.eventPropertyPayload.page = this.path;
     this.eventPropertyPayload.browser = this.browser;
+    this.eventPropertyPayload.browserVersion = this.browserVersion;
     this.eventPropertyPayload.os = this.os;
     this.eventPropertyPayload.deviceType = this.deviceType;
     this.eventPropertyPayload.screenHeight = this.screenHeight;
@@ -498,7 +504,7 @@ class Fusion {
     this.eventPropertyPayload.referring_website =
       this.referrerDomain || "direct";
 
-    console.log(this.eventPropertyPayload);
+    //console.log(this.eventPropertyPayload);
     this.propertiesToSend = JSON.stringify(this.eventPropertyPayload);
     const Http = new XMLHttpRequest();
     this.time = new Date().getTime();
@@ -536,7 +542,7 @@ window.onbeforeunload = function () {
 
 // Auto executing function
 (function () {
-  // Poll for jQuery to come into existance
+  // Poll for jQuery to come into existance (only used for detecting dom ready)
   var autocapture = function (callback) {
     if (window.jQuery) {
       callback(jQuery);
@@ -550,122 +556,151 @@ window.onbeforeunload = function () {
   // Start polling...
   autocapture(function ($) {
     if (autocaptureEnabled) {
+      //check if (dom ready using jquery)
       $(function () {
         // Auto-captures button clicks
-        $("button").on("click", function () {
-          let button_title = $(this).text(),
-            button_id = this.id,
-            button_class = this.className;
-          let tag = button_title || button_id || button_class;
-          fusion.track(`${tag} button clicked`, "");
-          console.log(`${tag} button clicked`);
+        document.addEventListener(`click`, (e) => {
+          const origin = e.target.closest("button");
+
+          //check if origin exists and does not have class fusion-no-capture
+          if (origin && origin.className !== "fusion-no-capture") {
+            let button_name = origin.innerText,
+              button_id = origin.id,
+              button_class = origin.className;
+            let tag = button_name || button_id || button_class || "unnamed";
+
+            //console.log(`${tag} button clicked`);
+            fusion.track(`${tag} button clicked`, "");
+          }
         });
 
-        $("a").on("click", function () {
-          let link_title = $(this).text(),
-            link_id = this.id,
-            link_class = this.className;
-          let tag = link_title || link_id || link_class;
-          fusion.track(`${tag} link clicked`, "");
-          console.log(`${tag} link clicked`);
+        // Auto-captures link clicks
+        document.addEventListener(`click`, (e) => {
+          const origin = e.target.closest("a");
+
+          if (origin && origin.className !== "fusion-no-capture") {
+            let link_name = origin.innerText,
+              link_id = origin.id,
+              link_class = origin.className;
+            //TODO: does not capture link with no text but image as body
+            let tag = link_name || link_id || link_class || "unnamed";
+
+            //console.log(`${tag} link clicked`);
+            fusion.track(`${tag} link clicked`, "");
+          }
         });
 
-        // capture input entering and leaving event(not for checkbox or radio type)
-        $("input:not(:radio, :checkbox)").change(function () {
-          let input_id = this.id,
-            input_class = this.className;
-          let tag = "unnamed";
-          tag = input_id || input_class;
-          fusion.track(`${tag} input filled`, "");
-          console.log(`${tag} input filled`);
+        // Auto-captures all input fill-up attemp other than checkbox & radio
+        document.addEventListener(`change`, (e) => {
+          const origin = e.target.closest(
+            'input:not([type="checkbox"], [type="radio"])'
+          );
+          if (origin && origin.className !== "fusion-no-capture") {
+            if (origin.value.length > 0) {
+              let input_name = "",
+                input_id = origin.id,
+                input_class = origin.className;
+
+              //get the placeholder if exists
+              if (origin.attributes["placeholder"] !== undefined) {
+                input_name = origin.attributes["placeholder"].value;
+              }
+
+              let tag = input_name || input_id || input_class || "unnamed";
+
+              //console.log(`${tag} filled`);
+              fusion.track(`${tag} filled`, "");
+            }
+          }
         });
 
-        $("input:radio").click(function () {
-          let tag = $(this).val();
-          fusion.track(`${tag} selected`, "");
-          console.log(`${tag} selected`);
+        // Auto-captures check-box selection
+        document.addEventListener(`click`, (e) => {
+          const origin = e.target.closest('input[type="checkbox"]:checked');
+
+          if (origin && origin.className !== "fusion-no-capture") {
+            let input_value = origin.value,
+              input_id = origin.id,
+              input_class = origin.className;
+
+            let tag = input_value || input_id || input_class || "unnamed";
+
+            //console.log(`${tag} checked`);
+            fusion.track(`${tag} checked`, "");
+          }
         });
 
-        $("input:checkbox").click(function () {
-          let tag = $(this).val();
-          fusion.track(`${tag} selected`, "");
-          console.log(`${tag} selected`);
+        // Auto-captures radio selection
+        document.addEventListener(`click`, (e) => {
+          const origin = e.target.closest('input[type="radio"]:checked');
+
+          if (origin && origin.className !== "fusion-no-capture") {
+            let input_value = origin.value,
+              input_id = origin.id,
+              input_class = origin.className;
+            let tag = input_value || input_id || input_class || "unnamed";
+
+            //console.log(`${tag} checked`);
+            fusion.track(`${tag} checked`, "");
+          }
         });
 
-        $("input:file").click(function () {
-          let input_id = this.id,
-            input_class = this.className;
-          let tag = "unnamed";
-          tag = input_id || input_class;
-          fusion.track(`${tag} input clicked`, "");
-          console.log(`${tag} input clicked`);
+        // Auto-captures select option
+        document.addEventListener(`change`, (e) => {
+          const origin = e.target.closest("select");
+
+          if (origin && origin.className !== "fusion-no-capture") {
+            let input_value = origin.value,
+              input_id = origin.id,
+              input_class = origin.className;
+            let tag = input_value || input_id || input_class || "unnamed";
+
+            //console.log(`${tag} selected`);
+            fusion.track(`${tag} selected`, "");
+          }
         });
 
-        // Sends event on a form submission
-        $("form").submit(function (event) {
-          event.preventDefault();
-          let form_name = $(this).closest("form").attr("name");
-          let form_related_text = $(this).closest("form").first().text();
-          form_name == undefined ? (form_name = form_related_text) : "";
-          fusion.track(`${form_name} form submitted`, "");
-          console.log(`${form_name} form submitted`);
+        // Auto-captures form-submission
+        document.addEventListener(`submit`, (e) => {
+          const origin = e.target.closest("form");
+
+          if (origin && origin.className !== "fusion-no-capture") {
+            let form_name,
+              form_action,
+              form_id = origin.id,
+              form_class = origin.className;
+
+            //get the form name if exists
+            if (origin.attributes["name"] !== undefined) {
+              form_name = origin.attributes["name"].value;
+            }
+
+            //get the form action if exists
+            if (origin.attributes["action"] !== undefined) {
+              form_action = origin.attributes["action"].value;
+            }
+
+            let tag =
+              form_name || form_action || form_id || form_class || "unnamed";
+            //console.log(`${tag} form submitted`);
+            fusion.track(`${tag} form submitted`, "");
+          }
         });
 
-        //Option selector - sends selected value
-        $("select").change(function () {
-          let tag = $(this).val();
-          fusion.track(`${tag} selected`, "");
-          console.log(`${tag} selected`);
+        // Auto-captures file upload attemp
+        document.addEventListener(`click`, (e) => {
+          const origin = e.target.closest('input[type="file"]');
+
+          if (origin && origin.className !== "fusion-no-capture") {
+            let input_value = origin.value,
+              input_id = origin.id,
+              input_class = origin.className;
+            let tag = input_value || input_id || input_class || "unnamed";
+
+            //console.log(`${tag} input clicked`);
+            fusion.track(`${tag} input clicked`, "");
+          }
         });
-
-        // $("audio").click(function () {
-        //   let audio_id = this.id,
-        //     audio_class = this.classname,
-        //     audio_related_text = $(this).closest("audio").first().text();
-        //   let tag = audio_id || audio_class || audio_related_text;
-        //   if (this.paused == false) {
-        //     this.pause();
-        //     console.log(`${tag} audio paused `);
-        //   } else {
-        //     this.play();
-        //     console.log(`${tag} audio played`);
-        //   }
-        // });
-
-        // //! Detects video play/pause (buggy)
-        // $("video").click(function () {
-        //   let video_id = this.id,
-        //     video_class = this.classname,
-        //     video_related_text = $(this).closest("video").first().text();
-        //   let tag = video_id || video_class || video_related_text;
-        //   if (this.paused == false) {
-        //     this.pause();
-        //     console.log(`${tag} video paused `);
-        //   } else {
-        //     this.play();
-        //     console.log(`${tag} video played`);
-        //   }
-        // });
-
-        // //! Detects video click (buggy)
-        // $("video").click(function () {
-        //   console.log("video clicked");
-        // });
-
-        // //!buggy
-        // $("iframe").click(function () {
-        //   let video_id = this.id,
-        //     video_class = this.classname,
-        //     video_related_text = $(this).closest("video").first().text();
-        //   let tag = video_id || video_class || video_related_text;
-        //   if (this.paused == false) {
-        //     this.pause();
-        //     alert(`${tag} audio paused `);
-        //   } else {
-        //     this.play();
-        //     alert(`${tag} audio played`);
-        //   }
-        // });
       });
     }
   });

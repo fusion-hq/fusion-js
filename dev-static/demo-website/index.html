@@ -13,13 +13,34 @@
       Author: Vikas Singh 
       Date: 4/3/21 
      -->
-    <!-- Fusion page tracker script-->
+
+    <!-- Fusion Analytics Tracking Script-->
+    <script>
+      (function () {
+        var fusionScript = document.createElement("SCRIPT");
+        fusionScript.src =
+          // "https://cdn.jsdelivr.net/gh/fusion-hq/fusion-js/fusion-js-static/fusion.js"
+          "../fusion.js";
+        fusionScript.type = "text/javascript";
+        document.getElementsByTagName("HEAD")[0].appendChild(fusionScript);
+        document.onreadystatechange = function () {
+          if (document.readyState === "complete") {
+            fusion.init(
+              "608813b5254914007109279a",
+              // "https://fusion-event-collector.herokuapp.com",
+              "http://localhost:3000",
+              true
+            );
+          }
+        };
+      })();
+    </script>
   </head>
 
   <body>
     <!--
     <script src="./fusion-tracking-library.js"></script>
-   <script src="https://cdn.jsdelivr.net/gh/fusion-hq/fusion-tracking-suit-v3/fusion-tracking-library.js"></script>
+   <script src="https://cdn.jsdelivr.net/gh/fusion-hq/fusion-tracking-suit-v3/fusion.js"></script>
     <script>
       fusion.init("123", "http://localhost:3000", false);
     </script>
@@ -32,25 +53,6 @@
       fusion.init("123", "http://localhost:3000", false);
     </script>
   -->
-
-    <!-- Fusion Analytics Tracking Script-->
-    <script>
-      (function () {
-        var fusionScript = document.createElement("SCRIPT");
-        fusionScript.src = "../fusion.js";
-        fusionScript.type = "text/javascript";
-        document.getElementsByTagName("HEAD")[0].appendChild(fusionScript);
-        document.onreadystatechange = function () {
-          if (document.readyState === "complete") {
-            fusion.init(
-              "608813b5254914007109279a",
-              "http://localhost:3000",
-              true
-            );
-          }
-        };
-      })();
-    </script>
 
     <div id="root">
       <h1>This is the root page</h1>
@@ -77,14 +79,22 @@
       >
         Button1
       </button>
-      <button id="2" onclick="fusion.unregister(plan)">Button2</button>
+      <button id="2">Button2</button>
       <button id="3">Button3</button>
 
-      <a href="" id="test-link" class="TestLink">Test Link</a>
+      <a href="" id="test-link" class="TestLink"> Test Link </a>
 
-      <form name="TEST-FORM " type="submit">
-        <input id="name" class="some-classname-name-input" />
-        <input id="email" class="some-classname-email-input" />
+      <form name="TEST-FORM" type="submit">
+        <input
+          placeholder="gmail"
+          id="name"
+          class="some-classname-name-input"
+        />
+        <input
+          placeholder="password"
+          id="email"
+          class="some-classname-email-input"
+        />
         <button onclick="submit">Submit</button>
       </form>
 
@@ -116,7 +126,7 @@
       <input type="file" id="myfile" name="myfile" /><br /><br />
       <input type="submit" value="Submit" />
 
-      <form action="/action_page.php">
+      <form name="car-form" action="/action_page.php">
         <label for="cars">Choose a car:</label>
         <select name="cars" id="cars">
           <option value="volvo">Volvo</option>
