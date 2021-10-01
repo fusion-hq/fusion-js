@@ -7,17 +7,12 @@
  *
  *
  * * Change Log :
- *  Auto-capture is completely based on vanilla JS insated of Jquery - Vikas Singh -29/09/21
+ *  1)Auto-capture is completely based on vanilla JS insated of Jquery - Vikas Singh -29/09/21
  *  Although detecting dom ready uses jquery as vanilla is not compatible some IE versions
+ *  2) Jquery totally removed, auto-capture works for single page apps, cookie used to store
+ *  autocapture mode  - Vikas Singh - 01/10/21
  *
  */
-
-//Load the jquery script
-var script = document.createElement("SCRIPT");
-script.src = "https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js";
-script.type = "text/javascript";
-document.getElementsByTagName("HEAD")[0].appendChild(script);
-var autocaptureEnabled;
 
 class Fusion {
   /** Extracts & saves user/browser data,
@@ -527,8 +522,8 @@ class Fusion {
   init(api_key, api_host, autocapture_enabled) {
     this.apiHost = api_host;
     this.apiKey = api_key;
-    autocaptureEnabled = autocapture_enabled;
     this.setup();
+    this.createCookie("fusion_autocapture", `${autocapture_enabled}`, 730);
   }
 }
 
@@ -540,168 +535,166 @@ window.onbeforeunload = function () {
   fusion.track("Pageleave");
 };
 
-// Auto executing function
-(function () {
-  // Poll for jQuery to come into existance (only used for detecting dom ready)
-  var autocapture = function (callback) {
-    if (window.jQuery) {
-      callback(jQuery);
-    } else {
-      window.setTimeout(function () {
-        autocapture(callback);
-      }, 20);
+//local function to read cookie
+function getCookie(cname) {
+  let name = cname + "=";
+  let decodedCookie = decodeURIComponent(document.cookie);
+  let ca = decodedCookie.split(";");
+  for (let i = 0; i < ca.length; i++) {
+    let c = ca[i];
+    while (c.charAt(0) == " ") {
+      c = c.substring(1);
     }
-  };
+    if (c.indexOf(name) == 0) {
+      return c.substring(name.length, c.length);
+    }
+  }
+  return "";
+}
 
-  // Start polling...
-  autocapture(function ($) {
-    if (autocaptureEnabled) {
-      //check if (dom ready using jquery)
-      $(function () {
-        // Auto-captures button clicks
-        document.addEventListener(`click`, (e) => {
-          const origin = e.target.closest("button");
+//get autocapture mode from cookie
+var autocaptureEnabled = getCookie("fusion_autocapture");
 
-          //check if origin exists and does not have class fusion-no-capture
-          if (origin && origin.className !== "fusion-no-capture") {
-            let button_name = origin.innerText,
-              button_id = origin.id,
-              button_class = origin.className;
-            let tag = button_name || button_id || button_class || "unnamed";
+if (autocaptureEnabled === "true") {
+  document.addEventListener(`click`, (e) => {
+    const origin = e.target.closest("button");
 
-            //console.log(`${tag} button clicked`);
-            fusion.track(`${tag} button clicked`, "");
-          }
-        });
+    //check if origin exists and does not have class fusion-no-capture
+    if (origin && origin.className !== "fusion-no-capture") {
+      let button_name = origin.innerText,
+        button_id = origin.id,
+        button_class = origin.className;
+      let tag = button_name || button_id || button_class || "unnamed";
 
-        // Auto-captures link clicks
-        document.addEventListener(`click`, (e) => {
-          const origin = e.target.closest("a");
-
-          if (origin && origin.className !== "fusion-no-capture") {
-            let link_name = origin.innerText,
-              link_id = origin.id,
-              link_class = origin.className;
-            //TODO: does not capture link with no text but image as body
-            let tag = link_name || link_id || link_class || "unnamed";
-
-            //console.log(`${tag} link clicked`);
-            fusion.track(`${tag} link clicked`, "");
-          }
-        });
-
-        // Auto-captures all input fill-up attemp other than checkbox & radio
-        document.addEventListener(`change`, (e) => {
-          const origin = e.target.closest(
-            'input:not([type="checkbox"], [type="radio"])'
-          );
-          if (origin && origin.className !== "fusion-no-capture") {
-            if (origin.value.length > 0) {
-              let input_name = "",
-                input_id = origin.id,
-                input_class = origin.className;
-
-              //get the placeholder if exists
-              if (origin.attributes["placeholder"] !== undefined) {
-                input_name = origin.attributes["placeholder"].value;
-              }
-
-              let tag = input_name || input_id || input_class || "unnamed";
-
-              //console.log(`${tag} filled`);
-              fusion.track(`${tag} filled`, "");
-            }
-          }
-        });
-
-        // Auto-captures check-box selection
-        document.addEventListener(`click`, (e) => {
-          const origin = e.target.closest('input[type="checkbox"]:checked');
-
-          if (origin && origin.className !== "fusion-no-capture") {
-            let input_value = origin.value,
-              input_id = origin.id,
-              input_class = origin.className;
-
-            let tag = input_value || input_id || input_class || "unnamed";
-
-            //console.log(`${tag} checked`);
-            fusion.track(`${tag} checked`, "");
-          }
-        });
-
-        // Auto-captures radio selection
-        document.addEventListener(`click`, (e) => {
-          const origin = e.target.closest('input[type="radio"]:checked');
-
-          if (origin && origin.className !== "fusion-no-capture") {
-            let input_value = origin.value,
-              input_id = origin.id,
-              input_class = origin.className;
-            let tag = input_value || input_id || input_class || "unnamed";
-
-            //console.log(`${tag} checked`);
-            fusion.track(`${tag} checked`, "");
-          }
-        });
-
-        // Auto-captures select option
-        document.addEventListener(`change`, (e) => {
-          const origin = e.target.closest("select");
-
-          if (origin && origin.className !== "fusion-no-capture") {
-            let input_value = origin.value,
-              input_id = origin.id,
-              input_class = origin.className;
-            let tag = input_value || input_id || input_class || "unnamed";
-
-            //console.log(`${tag} selected`);
-            fusion.track(`${tag} selected`, "");
-          }
-        });
-
-        // Auto-captures form-submission
-        document.addEventListener(`submit`, (e) => {
-          const origin = e.target.closest("form");
-
-          if (origin && origin.className !== "fusion-no-capture") {
-            let form_name,
-              form_action,
-              form_id = origin.id,
-              form_class = origin.className;
-
-            //get the form name if exists
-            if (origin.attributes["name"] !== undefined) {
-              form_name = origin.attributes["name"].value;
-            }
-
-            //get the form action if exists
-            if (origin.attributes["action"] !== undefined) {
-              form_action = origin.attributes["action"].value;
-            }
-
-            let tag =
-              form_name || form_action || form_id || form_class || "unnamed";
-            //console.log(`${tag} form submitted`);
-            fusion.track(`${tag} form submitted`, "");
-          }
-        });
-
-        // Auto-captures file upload attemp
-        document.addEventListener(`click`, (e) => {
-          const origin = e.target.closest('input[type="file"]');
-
-          if (origin && origin.className !== "fusion-no-capture") {
-            let input_value = origin.value,
-              input_id = origin.id,
-              input_class = origin.className;
-            let tag = input_value || input_id || input_class || "unnamed";
-
-            //console.log(`${tag} input clicked`);
-            fusion.track(`${tag} input clicked`, "");
-          }
-        });
-      });
+      //console.log(`${tag} button clicked`);
+      fusion.track(`${tag} button clicked`, "");
     }
   });
-})();
+
+  // Auto-captures link clicks
+  document.addEventListener(`click`, (e) => {
+    const origin = e.target.closest("a");
+
+    if (origin && origin.className !== "fusion-no-capture") {
+      let link_name = origin.innerText,
+        link_id = origin.id,
+        link_class = origin.className;
+      //TODO: does not capture link with no text but image as body
+      let tag = link_name || link_id || link_class || "unnamed";
+
+      //console.log(`${tag} link clicked`);
+      fusion.track(`${tag} link clicked`, "");
+    }
+  });
+
+  // Auto-captures all input fill-up attemp other than checkbox & radio
+  document.addEventListener(`change`, (e) => {
+    const origin = e.target.closest(
+      'input:not([type="checkbox"], [type="radio"])'
+    );
+    if (origin && origin.className !== "fusion-no-capture") {
+      if (origin.value.length > 0) {
+        let input_name = "",
+          input_id = origin.id,
+          input_class = origin.className;
+
+        //get the placeholder if exists
+        if (origin.attributes["placeholder"] !== undefined) {
+          input_name = origin.attributes["placeholder"].value;
+        }
+
+        let tag = input_name || input_id || input_class || "unnamed";
+
+        //console.log(`${tag} filled`);
+        fusion.track(`${tag} filled`, "");
+      }
+    }
+  });
+
+  // Auto-captures check-box selection
+  document.addEventListener(`click`, (e) => {
+    const origin = e.target.closest('input[type="checkbox"]:checked');
+
+    if (origin && origin.className !== "fusion-no-capture") {
+      let input_value = origin.value,
+        input_id = origin.id,
+        input_class = origin.className;
+
+      let tag = input_value || input_id || input_class || "unnamed";
+
+      //console.log(`${tag} checked`);
+      fusion.track(`${tag} checked`, "");
+    }
+  });
+
+  // Auto-captures radio selection
+  document.addEventListener(`click`, (e) => {
+    const origin = e.target.closest('input[type="radio"]:checked');
+
+    if (origin && origin.className !== "fusion-no-capture") {
+      let input_value = origin.value,
+        input_id = origin.id,
+        input_class = origin.className;
+      let tag = input_value || input_id || input_class || "unnamed";
+
+      //console.log(`${tag} checked`);
+      fusion.track(`${tag} checked`, "");
+    }
+  });
+
+  // Auto-captures select option
+  document.addEventListener(`change`, (e) => {
+    const origin = e.target.closest("select");
+
+    if (origin && origin.className !== "fusion-no-capture") {
+      let input_value = origin.value,
+        input_id = origin.id,
+        input_class = origin.className;
+      let tag = input_value || input_id || input_class || "unnamed";
+
+      //console.log(`${tag} selected`);
+      fusion.track(`${tag} selected`, "");
+    }
+  });
+
+  // Auto-captures form-submission
+  document.addEventListener(`submit`, (e) => {
+    const origin = e.target.closest("form");
+
+    if (origin && origin.className !== "fusion-no-capture") {
+      let form_name,
+        form_action,
+        form_id = origin.id,
+        form_class = origin.className;
+
+      //get the form name if exists
+      if (origin.attributes["name"] !== undefined) {
+        form_name = origin.attributes["name"].value;
+      }
+
+      //get the form action if exists
+      if (origin.attributes["action"] !== undefined) {
+        form_action = origin.attributes["action"].value;
+      }
+
+      let tag = form_name || form_action || form_id || form_class || "unnamed";
+      //console.log(`${tag} form submitted`);
+      fusion.track(`${tag} form submitted`, "");
+    }
+  });
+
+  // Auto-captures file upload attemp
+  document.addEventListener(`click`, (e) => {
+    const origin = e.target.closest('input[type="file"]');
+
+    if (origin && origin.className !== "fusion-no-capture") {
+      let input_value = origin.value,
+        input_id = origin.id,
+        input_class = origin.className;
+      let tag = input_value || input_id || input_class || "unnamed";
+
+      //console.log(`${tag} input clicked`);
+      fusion.track(`${tag} input clicked`, "");
+    }
+  });
+}

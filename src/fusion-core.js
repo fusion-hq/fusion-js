@@ -311,3 +311,8 @@ export function init_fusion_as_module() {
   var fusion_lib_instance = new Fusion();
   return fusion_lib_instance;
 }
+
+export function init_as_snippet() {
+  var fusion_lib_instance = new Fusion();
+  document.
+}

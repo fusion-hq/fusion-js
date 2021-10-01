@@ -415,8 +415,11 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 _moduleLoader.default.init("608813b5254914007109279a", "http://localhost:3000", true);
 
 _moduleLoader.default.indentify("vikas3091999"); //fusion.register({ ice_cream: "vanilla-chocolate" });
-//fusion.track("icecream");
-//fusion.unregister("ice_cream");
+
+
+_moduleLoader.default.track("icecream");
+
+console.log("done"); //fusion.unregister("ice_cream");
 //fusion.track("no-icecream");
 //fusion.track("Pageview");
 },{"../dist/module-loader.js":"../dist/module-loader.js"}],"../node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
@@ -447,7 +450,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "58914" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "49700" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
